@@ -6,7 +6,8 @@ from json import loads
 from os.path import isfile
 from os.path import getmtime
 from time import time
-from  json import dump
+from json import dump
+import csv
 
 
 def check_cve():
@@ -37,7 +38,15 @@ def check_file_modified(filename, days):
 
 def write_json(filename, result):
     with open(filename, 'w') as f:
-        dump(result, f)
+        dump(result, f, indent=2)
+
+
+def write_csv(filename, result, header):
+    with open(filename, 'w', newline='') as f:
+        writer = csv.writer(f, delimiter=',')
+        writer.writerow(header)
+        for ele in result:
+            writer.writerow([ele["id"], ele["last-modified"], ele["cvss"], ele["summary"]])
 
 
 def search(params, options):
@@ -70,7 +79,10 @@ def search(params, options):
                 continue
         print(f"{options.vendor}:{options.product}:{options.version}:{options.edition} "
               f"has impacted by {len(cve_result)} cve")
-        write_json("result.json", cve_result)
+        if options.output is None or options.output == "csv":
+            write_csv("result.csv", cve_result, ["id", "last-modified", "cvss", "summary"])
+        else:
+            write_json("result.json", cve_result)
     except Exception as e:
         print(e)
 
@@ -81,6 +93,7 @@ def get_opt():
     parser.add_option("-V", "--vendor", dest="vendor", help="which vendor")
     parser.add_option("-v", "--version", dest="version", help="which version")
     parser.add_option("-e", "--edition", dest="edition", help="which edition")
+    parser.add_option("-o", "--output", dest="output", help="specify output formar, csv or json")
     (options, args) = parser.parse_args()
     return options, args
 
