@@ -1,6 +1,6 @@
 # check-cve
 
-A tool to chekc all the cves related to specific product and versions.
+The tool is utiled to obtain all cve related to specific product, version and other information.
 
 ## Run
 
